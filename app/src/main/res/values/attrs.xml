@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TwinklingRefreshLayout">
+        <attr name="tr_wave_height" format="dimension"/>
+        <attr name="tr_head_height" format="dimension"/>
+    </declare-styleable>
+</resources>
