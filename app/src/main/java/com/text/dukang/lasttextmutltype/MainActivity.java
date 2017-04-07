@@ -6,8 +6,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.alibaba.fastjson.JSON;
@@ -22,6 +24,7 @@ import com.text.dukang.lasttextmutltype.util.HomeDealUtil;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
 
     private Context context;
     private RecyclerView recyclerView;
@@ -55,25 +58,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        headView = View.inflate(context, R.layout.header_view, null);
-        footView = View.inflate(context, R.layout.footer_view, null);
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         homeRecyclerAdapter = new HomeRecyclerAdapter(context);
         homeRecyclerAdapter.addHeadView(headView);
         homeRecyclerAdapter.addFootView(footView);
 
-//        final GridLayoutManager gridLayoutManager = new GridLayoutManager(context, 2);
-//        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-//            @Override
-//            public int getSpanSize(int position) {
-//                return homeRecyclerAdapter.getSpanCount(gridLayoutManager);
-//            }
-//        });
-//        recyclerView.setLayoutManager(gridLayoutManager);
+        /**
+         * 线性布局
+         */
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
+
+        /**
+         * 网格布局
+         */
+//        GridLayoutManager gridLayoutManager = new GridLayoutManager(context, 2);
+//        homeRecyclerAdapter.setSpanCount(gridLayoutManager);
+//        recyclerView.setLayoutManager(gridLayoutManager);
+
         recyclerView.setAdapter(homeRecyclerAdapter);
         initRefresh();
         initLoadmore();
@@ -83,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.addOnScrollListener(new EndLessOnScrollListener() {
             @Override
             public void onLoadMore(Loading loading) {
+                Log.e(TAG, "onLoadMore: "+"我是加载更多" );
                 handler.sendEmptyMessageDelayed(101, 2000);
             }
         });
@@ -105,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         jsonData = FileUtils.readJsonFile(this, "json").replace(" ", "");
         HomeBean homeBean = JSON.parseObject(jsonData, HomeBean.class);
         List<ContentBean> contentBeanList = homeBean.getBody().getContent();
+        Log.e(TAG, "initData: "+contentBeanList.size() );
         for (int i = 0; i < contentBeanList.size(); i++) {
             HomeDealUtil.dataDeal(context, contentBeanList.get(i));
         }

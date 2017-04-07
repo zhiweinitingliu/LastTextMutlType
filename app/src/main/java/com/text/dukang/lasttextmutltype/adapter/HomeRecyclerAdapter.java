@@ -37,7 +37,6 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     private static final int HEAD_VIEW_TYPE = 1001;
     private static final int FOOT_VIEW_TYPE = 1002;
-    private int lastPosition = -1;
 
 
     public HomeRecyclerAdapter(Context context) {
@@ -91,54 +90,7 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         }
     }
 
-    public enum ViewType {
-        Header(0), Footer(1), Grid(2);
-
-        public final int value;
-
-        ViewType(int value) {
-            this.value = value;
-        }
-
-        public static ViewType fromValue(int value) {
-            for (ViewType type : ViewType.values()) {
-                if (type.value == value) {
-                    return type;
-                }
-            }
-            return null;
-        }
-    }
-
-
-//    private ViewType itemViewType = ViewType.Grid;
-
-    int viewtype = 2;
-
-    public int getSpanSize(GridLayoutManager gridLayoutManager) {
-
-        Log.e("getSpanSize", "getSpanSize: " + viewtype);
-
-        return viewtype;
-    }
-
-    private void setAnimation(View viewToAnimate, int position) {
-        if (position > lastPosition) {
-            Animation animation = AnimationUtils.loadAnimation(viewToAnimate.getContext(), R
-                    .anim.item_bottom_in);
-            viewToAnimate.startAnimation(animation);
-            lastPosition = position;
-        }
-    }
-
-//    @Override
-//    public void onViewDetachedFromWindow(BaseViewHolder holder) {
-//        super.onViewDetachedFromWindow(holder);
-//
-////        holder.ll_content.clearAnimation();
-//    }
-
-    public int getSpanCount(GridLayoutManager gridLayoutManager) {
+    public void setSpanCount(GridLayoutManager gridLayoutManager) {
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -147,11 +99,9 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                     return 1;//只占一行中的一列，
                 } else {
                     return 2;//独占一行
-//                    return gridLayoutManager.getSpanCount();//独占一行
                 }
             }
         });
-        return 2;
     }
 
     @Override
