@@ -10,17 +10,22 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.text.dukang.lasttextmutltype.adapter.HomeRecyclerAdapter;
 import com.text.dukang.lasttextmutltype.bean.ContentBean;
 import com.text.dukang.lasttextmutltype.bean.HomeBean;
+import com.text.dukang.lasttextmutltype.data.BaseData;
 import com.text.dukang.lasttextmutltype.listener.EndLessOnScrollListener;
 import com.text.dukang.lasttextmutltype.util.DataMagr;
 import com.text.dukang.lasttextmutltype.util.FileUtils;
 import com.text.dukang.lasttextmutltype.util.HomeDealUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
     private View headView;
     private View footView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private int currentpage = 1;
+    private int totalPage = 5;
+    List<BaseData> dataList = new ArrayList<>();
+    private ProgressBar progressBar;
+    private TextView footText;
+
 
     Handler handler = new Handler() {
         @Override
@@ -42,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 101:
                     initData();
+                    break;
+                case 103:
+                    setLoadNoMore();
                     break;
             }
         }
@@ -61,22 +75,26 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        homeRecyclerAdapter = new HomeRecyclerAdapter(context);
+        homeRecyclerAdapter = new HomeRecyclerAdapter(context, dataList);
+        headView = View.inflate(context, R.layout.header_view, null);
+        footView = View.inflate(context, R.layout.footer_view, null);
+        progressBar = (ProgressBar) footView.findViewById(R.id.progressbar);
+        footText = (TextView) footView.findViewById(R.id.footText);
         homeRecyclerAdapter.addHeadView(headView);
         homeRecyclerAdapter.addFootView(footView);
 
         /**
          * 线性布局
          */
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        recyclerView.setLayoutManager(layoutManager);
+//        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+//        recyclerView.setLayoutManager(layoutManager);
 
         /**
          * 网格布局
          */
-//        GridLayoutManager gridLayoutManager = new GridLayoutManager(context, 2);
-//        homeRecyclerAdapter.setSpanCount(gridLayoutManager);
-//        recyclerView.setLayoutManager(gridLayoutManager);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(context, 2);
+        homeRecyclerAdapter.setSpanCount(gridLayoutManager);
+        recyclerView.setLayoutManager(gridLayoutManager);
 
         recyclerView.setAdapter(homeRecyclerAdapter);
         initRefresh();
@@ -87,8 +105,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.addOnScrollListener(new EndLessOnScrollListener() {
             @Override
             public void onLoadMore(Loading loading) {
-                Log.e(TAG, "onLoadMore: "+"我是加载更多" );
-                handler.sendEmptyMessageDelayed(101, 2000);
+                Log.e(TAG, "onLoadMore: " + "我是加载更多" + currentpage);
+                if (currentpage < totalPage) {
+                    currentpage++;
+                    handler.sendEmptyMessageDelayed(101, 2000);
+                    setLoadMoreLoading();
+                    loading.setLoading(true);
+                } else {
+                    loading.setLoading(false);
+                    handler.sendEmptyMessageDelayed(103, 2000);
+                }
             }
         });
     }
@@ -97,11 +123,23 @@ public class MainActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                homeRecyclerAdapter.clearDate();
+                currentpage = 1;
+                initData();
                 handler.sendEmptyMessageDelayed(100, 2000);
             }
         });
     }
 
+    public void setLoadMoreLoading() {
+        progressBar.setVisibility(View.VISIBLE);
+        footText.setText("正在加载...");
+    }
+
+    public void setLoadNoMore() {
+        progressBar.setVisibility(View.GONE);
+        footText.setText("已加载全部数据^_^");
+    }
 
     private String jsonData;
 
@@ -110,12 +148,10 @@ public class MainActivity extends AppCompatActivity {
         jsonData = FileUtils.readJsonFile(this, "json").replace(" ", "");
         HomeBean homeBean = JSON.parseObject(jsonData, HomeBean.class);
         List<ContentBean> contentBeanList = homeBean.getBody().getContent();
-        Log.e(TAG, "initData: "+contentBeanList.size() );
-        for (int i = 0; i < contentBeanList.size(); i++) {
-            HomeDealUtil.dataDeal(context, contentBeanList.get(i));
-        }
-
-        homeRecyclerAdapter.setData(DataMagr.getDataList());
+        Log.e(TAG, "initData: " + contentBeanList.size());
+        DataMagr.clearDataList();
+        List<BaseData> dataList = HomeDealUtil.getDataList(context, contentBeanList);
+        homeRecyclerAdapter.setData(dataList);
         homeRecyclerAdapter.notifyDataSetChanged();
     }
 }

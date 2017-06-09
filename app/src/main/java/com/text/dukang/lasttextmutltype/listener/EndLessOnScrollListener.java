@@ -1,5 +1,6 @@
 package com.text.dukang.lasttextmutltype.listener;
 
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -12,7 +13,7 @@ import android.support.v7.widget.RecyclerView;
 public abstract class EndLessOnScrollListener extends RecyclerView.OnScrollListener {
 
     //获取LayoutManager
-    private LinearLayoutManager linearLayoutManager;
+    private LinearLayoutManager myLayoutManager;
 
     //已经请求得到的所有item总数
     private int totalItemCount;
@@ -45,13 +46,15 @@ public abstract class EndLessOnScrollListener extends RecyclerView.OnScrollListe
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
 
         if (layoutManager instanceof LinearLayoutManager) {  //LinearLayoutManager  and  GridLayoutManager
-            linearLayoutManager = (LinearLayoutManager) layoutManager;
+            myLayoutManager = (LinearLayoutManager) layoutManager;
+        } else if (layoutManager instanceof GridLayoutManager) {
+            myLayoutManager = (GridLayoutManager) layoutManager;
         } else {
             return;
         }
 
-        totalItemCount = linearLayoutManager.getItemCount();
-        lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
+        totalItemCount = myLayoutManager.getItemCount();
+        lastVisibleItem = myLayoutManager.findLastVisibleItemPosition();
 
 
         if (loading.isLoading()) {

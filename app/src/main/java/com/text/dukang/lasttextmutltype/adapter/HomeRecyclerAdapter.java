@@ -39,15 +39,20 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     private static final int FOOT_VIEW_TYPE = 1002;
 
 
-    public HomeRecyclerAdapter(Context context) {
+    public HomeRecyclerAdapter(Context context, List<BaseData> homeDataList) {
         this.context = context;
         this.typeFactoryforList = new TypeFactoryforList();
+        this.homeDataList = homeDataList;
         headViews = new ArrayList<>();
         footViews = new ArrayList<>();
     }
 
-    public void setData(List<BaseData> homeDataList) {
-        this.homeDataList = homeDataList;
+    public void setData(List<BaseData> newDataList) {
+        homeDataList.addAll(newDataList);
+    }
+
+    public void clearDate() {
+        homeDataList.clear();
     }
 
     /**
@@ -107,9 +112,9 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == HEAD_VIEW_TYPE) {
-            return new HeadViewHolder(LayoutInflater.from(context).inflate(R.layout.header_view, parent, false), context);
+            return new HeadViewHolder(headViews.get(0), context);
         } else if (viewType == FOOT_VIEW_TYPE) {
-            return new FootViewHolder(LayoutInflater.from(context).inflate(R.layout.footer_view, parent, false), context);
+            return new FootViewHolder(footViews.get(0), context);
         }
 
         View view = LayoutInflater.from(context).inflate(viewType, parent, false);
@@ -125,7 +130,7 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     @Override
     public int getItemCount() {
-        return homeDataList == null ? 0 : homeDataList.size() + headViews.size() + footViews.size();
+        return homeDataList == null ? 0 : homeDataList.size() + headViews.size() + getFooSize();
     }
 
     @Override
@@ -142,5 +147,9 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         } else {
             return FOOT_VIEW_TYPE;
         }
+    }
+
+    public int getFooSize() {
+        return homeDataList.size() > 10 ? footViews.size() : 0;//在开发中会有分页，如果分页的时候每页返回15调数据，当返回10条的时候就是只有一页，10条可能不能占满屏幕，所以不显示脚布局
     }
 }

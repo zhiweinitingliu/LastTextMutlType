@@ -1,6 +1,7 @@
 package com.text.dukang.lasttextmutltype.util;
 
 import com.text.dukang.lasttextmutltype.data.BaseData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,5 +22,9 @@ public class DataMagr {
 
     public static List<BaseData> getDataList() {
         return dataList;
+    }
+
+    public static void clearDataList() {
+        dataList.clear();
     }
 }
